@@ -1,0 +1,10 @@
+html
+    head
+        title Docker Identicon
+    body
+        form(method='post')
+            | Hello
+            input(type='text' name='name' value=''+name)
+            input(type='submit' value='Abschicken')
+        p Du siehst aus wie ein
+            img(src="/monster/"+hash)

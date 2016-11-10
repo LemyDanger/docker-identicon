@@ -1,0 +1,26 @@
+{
+  "name": "docker-identicon",
+  "version": "1.0.0",
+  "description": "A simple clone of a python docker project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LemyDanger/docker-identicon.git"
+  },
+  "author": "Joachim Hahn <joachim.hahn@1und1.de>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LemyDanger/docker-identicon/issues"
+  },
+  "homepage": "https://github.com/LemyDanger/docker-identicon#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "pug": "^2.0.0-beta6",
+    "request": "^2.78.0"
+  }
+}
