@@ -2,7 +2,10 @@ var express = require('express');
 var request = require('request').defaults({ encoding: null });
 var crypto = require('crypto');
 var bodyParser = require('body-parser');
-var fs = require('fs');
+var redis = require('redis');
+
+var redisClient = redis.createClient(6379, 'redis', {'return_buffers': true});
+
 
 var app = express();
 app.use(bodyParser.urlencoded({extended: false}));
@@ -28,14 +31,53 @@ app.all('/', function(req,res) {
 
 app.get('/monster/:name', function(req,res) {
 
-    name = req.params.name ? req.params.name : defaultName;
-    var uri = 'http://dnmonster:8080/monster/'+name+'?size=80';
+    var name = req.params.name ? req.params.name : defaultName;
+    var image;
+    console.log("Look for image",name);
 
-    request.get(uri, function(error,response,body) {
-        image = body;
-        res.writeHead(200, {'Content-Type': 'image/png' });
-        res.end(image, 'binary');
+    var imageExist = new Promise(function(resolve,reject) {
+
+        // Load image from cache
+        redisClient.get(name, function (err, value) {
+            console.log("Client",err,value);
+            if (!err && value) {
+                console.log("Cache hit", value);
+                resolve(value);
+            } else {
+                console.log("Cache miss");
+                var uri = 'http://dnmonster:8080/monster/' + name + '?size=80';
+                request.get(uri, function (error, response, body) {
+                    if (body) {
+                        console.log("Image loaded");
+                        image = body;
+                        console.log("Set", name, image);
+                        redisClient.set(name, image);
+                        resolve(image);
+                    } else {
+                        console.log("Image needed")
+                        reject();
+                    }
+                });
+
+            }
+        })
     });
+
+
+    console.log("Promise",imageExist);
+
+    imageExist
+        .then(function(image) {
+            console.log("Then",arguments);
+            res.writeHead(200, {'Content-Type': 'image/png' });
+            res.end(image, 'binary');
+        })
+        .catch(function() {
+            console.log("FAIL");
+            res.status(404).send();
+        });
+
+
 });
 
 app.listen(3000, function () {
